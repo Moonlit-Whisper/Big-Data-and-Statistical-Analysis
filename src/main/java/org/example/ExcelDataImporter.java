@@ -96,18 +96,6 @@ public class ExcelDataImporter {
                     System.out.println("范围解析失败：" + range);
                 }
 
-/*
-                // 输出结果
-                System.out.println("位号: " + data); // 位号
-                if (lowerBound != null && upperBound != null) {
-                    // 如果上下限解析成功，输出上下限
-                    System.out.println("下限: " + lowerBound + ", 上限: " + upperBound);
-                } else {
-                    // 如果解析失败，输出错误信息
-                    System.out.println("范围解析失败：" + range);
-                }
-                System.out.println("-------------------------"); // 分隔符
-*/
             }
 
         } catch (IOException e) {
