@@ -3,7 +3,9 @@ package org.example;
 /**
  * ClassName: ExcelDataImporter
  * Package: org.example
- * Description:
+ * Description:导入excel数据。
+ *              并且把数据的上下限封装在
+ *              二维数组doubleArray当中。
  *
  * @Author 不白之鸢
  * @Create 2025/5/7 20:39

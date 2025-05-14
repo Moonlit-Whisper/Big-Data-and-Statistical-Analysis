@@ -1,22 +1,23 @@
 package org.example;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
  * ClassName: DataComparator
  * Package: org.example
- * Description:
+ * Description:数据比较。
+ *              记录下所有不符合范围的数据
+ *              以及所在位置（行列），
+ *              并且把问题单元格标红。
  *
  * @Author 不白之鸢
  * @Create 2025/5/13 22:35
- * @Version 1.0
+ * @Version 2.0
  */
 public class DataComparator {
     public static void DataCompare() {
@@ -26,17 +27,23 @@ public class DataComparator {
         // 定义一个计数器，用于统计所有单元格数量
         int totalCellCount = 0;
 
-
         // 调用 ExcelDataImport 方法获取上下限数据
         //下限索引是0,上限索引是1
         double[][] doubleArray = ExcelDataImporter.ExcelDataImport();
 
-        // 定义 Excel 文件的路径（相对于项目根目录）
+        // 定义 Excel 输入文件的路径（相对于项目根目录）
         String filePath = "resources/The original data for samples #285 and #313”.xlsx";
+        // 定义 Excel 输出文件的路径（相对于项目根目录）
+        String outputFilePath = "resources/modified_data.xlsx";
+
 
         // 使用 try-with-resources 自动关闭资源
         try (FileInputStream fis = new FileInputStream(filePath); // 打开文件输入流
+             FileOutputStream fos = new FileOutputStream(outputFilePath); // 打开文件输出流
              Workbook workbook = new XSSFWorkbook(fis)) { // 创建 Excel 工作簿对象
+
+            // 创建红色单元格样式
+            CellStyle redCellStyle = createRedCellStyle(workbook);
 
             // 获取 Excel 的第一个工作表（Sheet）
             Sheet sheet = workbook.getSheetAt(4);
@@ -65,8 +72,12 @@ public class DataComparator {
 
                     // 如果任一单元格为空，则报空值并跳过
                     if (dataCell == null) {
-                        problematicCellCount++;// 问题统计自增
+
+                        // 问题统计自增
+                        problematicCellCount++;
+
                         System.out.println("第" + (i + 1) + "行," + "第" + (j + 1) + "列的单元格数据:" + "空值" + "有问题");
+
                         continue;
                     }
 
@@ -74,7 +85,13 @@ public class DataComparator {
                     double data = dataCell.getNumericCellValue();
 
                     if (data < doubleArray[0][j-1] || data > doubleArray[1][j-1]) {
-                        problematicCellCount++;// 问题统计自增
+
+                        // 问题统计自增
+                        problematicCellCount++;
+
+                        // 应用红色样式
+                        dataCell.setCellStyle(redCellStyle);
+
                         // 如果数据不在上下限范围内，则输出提示信息
                         System.out.println("第" + (i + 1) + "行," + "第" + (j + 1) + "列的单元格数据:" + data + "有问题");
                         System.out.println("-------------------------"); // 分隔符
@@ -87,9 +104,24 @@ public class DataComparator {
             System.out.println("应检查" + 80 * 354 + "个数据单元格。");
             System.out.println("实检查" + totalCellCount + "个数据单元格。");
             System.out.println("其中，" + problematicCellCount + "个单元格数据有问题" + "，可查看上面的提示信息" + "。");
+            System.out.println();
+
+            // 写入修改后的工作簿到文件
+            workbook.write(fos);
+
+            System.out.println("涂色标记完成，结果已保存到:" + outputFilePath);
+            System.out.println("问题单元格涂色标记为红");
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // 定义一个方法，用于创建红色单元格样式
+    private static CellStyle createRedCellStyle(Workbook workbook) {
+        CellStyle redCellStyle = workbook.createCellStyle();
+        redCellStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
+        redCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return redCellStyle;
     }
 }
